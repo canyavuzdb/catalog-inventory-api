@@ -67,9 +67,10 @@ Clone the repository:
 ```bash
 git clone https://github.com/your-username/catalog-inventory-api.git
 cd catalog-inventory-api
-## How it works
 ```
 
+
+## How it works
 
 ```mermaid
 flowchart TD
