@@ -23,3 +23,7 @@ func (r *ProductRepository) GetProducts(limit int) ([]domain.Product, error) {
 
 	return products, nil
 }
+
+func (r *ProductRepository) CreateProduct(product *domain.Product) error {
+	return r.db.Create(product).Error
+}

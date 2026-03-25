@@ -16,3 +16,17 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 func (s *ProductService) GetProducts(limit int) ([]domain.Product, error) {
 	return s.repo.GetProducts(limit)
 }
+
+func (s *ProductService) CreateProduct(name string, price float64) (*domain.Product, error) {
+	product := &domain.Product{
+		Name:  name,
+		Price: price,
+	}
+
+	err := s.repo.CreateProduct(product)
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
