@@ -5,7 +5,8 @@ type Product {
 }
 
 type Query {
-  products(limit: Int!): [Product!]!
+  products(limit: Int!, minPrice: Float, maxPrice: Float): [Product!]!
+  product(id: ID!): Product
 }
 
 type Mutation {
