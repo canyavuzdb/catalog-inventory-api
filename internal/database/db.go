@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
+func Connect(runSeed bool) {
 	dsn := "host=localhost user=postgres password=postgres dbname=catalog_db port=5432 sslmode=disable"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -21,13 +21,10 @@ func Connect() {
 
 	fmt.Println("Database connected")
 
-	err = db.AutoMigrate(&domain.Category{}, &domain.Product{})
-	if err != nil {
-		log.Fatal("failed to migrate database:", err)
+	if runSeed {
+		seedCategories(db)
+		seedProducts(db)
 	}
-
-	seedCategories(db)
-	seedProducts(db)
 
 	DB = db
 }
