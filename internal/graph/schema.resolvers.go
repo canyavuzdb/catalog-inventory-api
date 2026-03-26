@@ -63,7 +63,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, name string, descr
 }
 
 // Products list
-func (r *queryResolver) Products(ctx context.Context, limit int, minPrice *float64, maxPrice *float64, categoryID *string) ([]*Product, error) {
+func (r *queryResolver) Products(ctx context.Context, limit int, offset *int, minPrice *float64, maxPrice *float64, categoryID *string, sortBy *ProductSortBy) ([]*Product, error) {
 	var parsedCategoryID *uint
 
 	if categoryID != nil {
@@ -75,7 +75,13 @@ func (r *queryResolver) Products(ctx context.Context, limit int, minPrice *float
 		parsedCategoryID = &value
 	}
 
-	items, err := r.ProductService.GetProducts(limit, minPrice, maxPrice, parsedCategoryID)
+	var parsedSortBy *string
+	if sortBy != nil {
+		value := string(*sortBy)
+		parsedSortBy = &value
+	}
+
+	items, err := r.ProductService.GetProducts(limit, offset, minPrice, maxPrice, parsedCategoryID, parsedSortBy)
 	if err != nil {
 		return nil, err
 	}

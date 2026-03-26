@@ -13,7 +13,14 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *float64, categoryID *uint) ([]domain.Product, error) {
+func (r *ProductRepository) GetProducts(
+	limit int,
+	offset *int,
+	minPrice *float64,
+	maxPrice *float64,
+	categoryID *uint,
+	sortBy *string,
+) ([]domain.Product, error) {
 	var products []domain.Product
 
 	query := r.db.Model(&domain.Product{}).Preload("Category")
@@ -28,6 +35,23 @@ func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *
 
 	if categoryID != nil {
 		query = query.Where("category_id = ?", *categoryID)
+	}
+
+	if sortBy != nil {
+		switch *sortBy {
+		case "PRICE_ASC":
+			query = query.Order("price asc")
+		case "PRICE_DESC":
+			query = query.Order("price desc")
+		case "CREATED_AT_ASC":
+			query = query.Order("created_at asc")
+		case "CREATED_AT_DESC":
+			query = query.Order("created_at desc")
+		}
+	}
+
+	if offset != nil {
+		query = query.Offset(*offset)
 	}
 
 	err := query.Limit(limit).Find(&products).Error

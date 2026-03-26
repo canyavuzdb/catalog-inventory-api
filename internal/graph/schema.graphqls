@@ -1,3 +1,10 @@
+enum ProductSortBy {
+  PRICE_ASC
+  PRICE_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+}
+
 type Category {
   id: ID!
   name: String!
@@ -16,7 +23,15 @@ type Product {
 }
 
 type Query {
-  products(limit: Int!, minPrice: Float, maxPrice: Float, categoryId: ID): [Product!]!
+  products(
+    limit: Int!
+    offset: Int
+    minPrice: Float
+    maxPrice: Float
+    categoryId: ID
+    sortBy: ProductSortBy
+  ): [Product!]!
+
   product(id: ID!): Product
   categories: [Category!]!
 }

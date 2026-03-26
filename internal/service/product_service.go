@@ -13,8 +13,15 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) GetProducts(limit int, minPrice *float64, maxPrice *float64, categoryID *uint) ([]domain.Product, error) {
-	return s.repo.GetProducts(limit, minPrice, maxPrice, categoryID)
+func (s *ProductService) GetProducts(
+	limit int,
+	offset *int,
+	minPrice *float64,
+	maxPrice *float64,
+	categoryID *uint,
+	sortBy *string,
+) ([]domain.Product, error) {
+	return s.repo.GetProducts(limit, offset, minPrice, maxPrice, categoryID, sortBy)
 }
 
 func (s *ProductService) GetProductByID(id uint) (*domain.Product, error) {
