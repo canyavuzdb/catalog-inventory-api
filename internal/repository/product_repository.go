@@ -13,10 +13,10 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *float64) ([]domain.Product, error) {
+func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *float64, categoryID *uint) ([]domain.Product, error) {
 	var products []domain.Product
 
-	query := r.db.Model(&domain.Product{})
+	query := r.db.Model(&domain.Product{}).Preload("Category")
 
 	if minPrice != nil {
 		query = query.Where("price >= ?", *minPrice)
@@ -24,6 +24,10 @@ func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *
 
 	if maxPrice != nil {
 		query = query.Where("price <= ?", *maxPrice)
+	}
+
+	if categoryID != nil {
+		query = query.Where("category_id = ?", *categoryID)
 	}
 
 	err := query.Limit(limit).Find(&products).Error
@@ -37,7 +41,7 @@ func (r *ProductRepository) GetProducts(limit int, minPrice *float64, maxPrice *
 func (r *ProductRepository) GetProductByID(id uint) (*domain.Product, error) {
 	var product domain.Product
 
-	err := r.db.First(&product, id).Error
+	err := r.db.Preload("Category").First(&product, id).Error
 	if err != nil {
 		return nil, err
 	}

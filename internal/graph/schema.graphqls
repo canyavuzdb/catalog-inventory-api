@@ -1,14 +1,33 @@
+type Category {
+  id: ID!
+  name: String!
+}
+
 type Product {
   id: ID!
   name: String!
+  description: String!
+  sku: String!
   price: Float!
+  categoryId: ID!
+  category: Category
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Query {
-  products(limit: Int!, minPrice: Float, maxPrice: Float): [Product!]!
+  products(limit: Int!, minPrice: Float, maxPrice: Float, categoryId: ID): [Product!]!
   product(id: ID!): Product
+  categories: [Category!]!
 }
 
 type Mutation {
-  createProduct(name: String!, price: Float!): Product!
+  createCategory(name: String!): Category!
+  createProduct(
+    name: String!
+    description: String!
+    sku: String!
+    price: Float!
+    categoryId: ID!
+  ): Product!
 }

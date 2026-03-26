@@ -2,13 +2,24 @@
 
 package graph
 
+type Category struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type Mutation struct {
 }
 
 type Product struct {
-	ID    string  `json:"id"`
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Sku         string    `json:"sku"`
+	Price       float64   `json:"price"`
+	CategoryID  string    `json:"categoryId"`
+	Category    *Category `json:"category,omitempty"`
+	CreatedAt   string    `json:"createdAt"`
+	UpdatedAt   string    `json:"updatedAt"`
 }
 
 type Query struct {

@@ -21,34 +21,82 @@ func Connect() {
 
 	fmt.Println("Database connected")
 
-	err = db.AutoMigrate(&domain.Product{})
+	err = db.AutoMigrate(&domain.Category{}, &domain.Product{})
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)
 	}
 
+	seedCategories(db)
 	seedProducts(db)
 
 	DB = db
 }
 
-func seedProducts(db *gorm.DB) {
+func seedCategories(db *gorm.DB) {
 	var count int64
-	db.Model(&domain.Product{}).Count(&count)
-
+	db.Model(&domain.Category{}).Count(&count)
 	if count > 0 {
 		return
 	}
 
+	categories := []domain.Category{
+		{Name: "Electronics"},
+		{Name: "Accessories"},
+		{Name: "Office"},
+	}
+
+	if err := db.Create(&categories).Error; err != nil {
+		log.Fatal("failed to seed categories:", err)
+	}
+
+	fmt.Println("Seed categories inserted")
+}
+
+func seedProducts(db *gorm.DB) {
+	var count int64
+	db.Model(&domain.Product{}).Count(&count)
+	if count > 0 {
+		return
+	}
+
+	var electronics domain.Category
+	var accessories domain.Category
+
+	if err := db.Where("name = ?", "Electronics").First(&electronics).Error; err != nil {
+		log.Fatal("failed to find Electronics category:", err)
+	}
+
+	if err := db.Where("name = ?", "Accessories").First(&accessories).Error; err != nil {
+		log.Fatal("failed to find Accessories category:", err)
+	}
+
 	products := []domain.Product{
-		{Name: "Laptop", Price: 1500},
-		{Name: "Keyboard", Price: 100},
-		{Name: "Mouse", Price: 50},
-		{Name: "Monitor", Price: 300},
+		{
+			Name:        "Laptop",
+			Description: "14 inch business laptop",
+			SKU:         "LAP-001",
+			Price:       1500,
+			CategoryID:  electronics.ID,
+		},
+		{
+			Name:        "Keyboard",
+			Description: "Mechanical keyboard",
+			SKU:         "KEY-001",
+			Price:       100,
+			CategoryID:  accessories.ID,
+		},
+		{
+			Name:        "Mouse",
+			Description: "Wireless mouse",
+			SKU:         "MOU-001",
+			Price:       50,
+			CategoryID:  accessories.ID,
+		},
 	}
 
 	if err := db.Create(&products).Error; err != nil {
 		log.Fatal("failed to seed products:", err)
 	}
 
-	fmt.Println("Seed data inserted")
+	fmt.Println("Seed products inserted")
 }

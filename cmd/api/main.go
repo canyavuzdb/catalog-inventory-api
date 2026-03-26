@@ -17,10 +17,14 @@ func main() {
 	database.Connect()
 
 	productRepo := repository.NewProductRepository(database.DB)
+	categoryRepo := repository.NewCategoryRepository(database.DB)
+
 	productService := service.NewProductService(productRepo)
+	categoryService := service.NewCategoryService(categoryRepo)
 
 	resolver := &graph.Resolver{
-		ProductService: productService,
+		ProductService:  productService,
+		CategoryService: categoryService,
 	}
 
 	srv := handler.NewDefaultServer(

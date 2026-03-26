@@ -13,22 +13,24 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) GetProducts(limit int, minPrice *float64, maxPrice *float64) ([]domain.Product, error) {
-	return s.repo.GetProducts(limit, minPrice, maxPrice)
+func (s *ProductService) GetProducts(limit int, minPrice *float64, maxPrice *float64, categoryID *uint) ([]domain.Product, error) {
+	return s.repo.GetProducts(limit, minPrice, maxPrice, categoryID)
 }
 
 func (s *ProductService) GetProductByID(id uint) (*domain.Product, error) {
 	return s.repo.GetProductByID(id)
 }
 
-func (s *ProductService) CreateProduct(name string, price float64) (*domain.Product, error) {
+func (s *ProductService) CreateProduct(name, description, sku string, price float64, categoryID uint) (*domain.Product, error) {
 	product := &domain.Product{
-		Name:  name,
-		Price: price,
+		Name:        name,
+		Description: description,
+		SKU:         sku,
+		Price:       price,
+		CategoryID:  categoryID,
 	}
 
-	err := s.repo.CreateProduct(product)
-	if err != nil {
+	if err := s.repo.CreateProduct(product); err != nil {
 		return nil, err
 	}
 
