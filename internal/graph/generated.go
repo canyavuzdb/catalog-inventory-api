@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Categories func(childComplexity int) int
 		Product    func(childComplexity int, id string) int
-		Products   func(childComplexity int, limit int, minPrice *float64, maxPrice *float64, categoryID *string) int
+		Products   func(childComplexity int, limit int, offset *int, minPrice *float64, maxPrice *float64, categoryID *string, sortBy *ProductSortBy) int
 	}
 }
 
@@ -69,7 +69,7 @@ type MutationResolver interface {
 	CreateProduct(ctx context.Context, name string, description string, sku string, price float64, categoryID string) (*Product, error)
 }
 type QueryResolver interface {
-	Products(ctx context.Context, limit int, minPrice *float64, maxPrice *float64, categoryID *string) ([]*Product, error)
+	Products(ctx context.Context, limit int, offset *int, minPrice *float64, maxPrice *float64, categoryID *string, sortBy *ProductSortBy) ([]*Product, error)
 	Product(ctx context.Context, id string) (*Product, error)
 	Categories(ctx context.Context) ([]*Category, error)
 }
@@ -207,7 +207,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.Products(childComplexity, args["limit"].(int), args["minPrice"].(*float64), args["maxPrice"].(*float64), args["categoryId"].(*string)), true
+		return e.ComplexityRoot.Query.Products(childComplexity, args["limit"].(int), args["offset"].(*int), args["minPrice"].(*float64), args["maxPrice"].(*float64), args["categoryId"].(*string), args["sortBy"].(*ProductSortBy)), true
 
 	}
 	return 0, false
@@ -382,21 +382,31 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["limit"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOFloat2ᚖfloat64)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "offset", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
-	args["minPrice"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "maxPrice", ec.unmarshalOFloat2ᚖfloat64)
+	args["offset"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOFloat2ᚖfloat64)
 	if err != nil {
 		return nil, err
 	}
-	args["maxPrice"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "categoryId", ec.unmarshalOID2ᚖstring)
+	args["minPrice"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "maxPrice", ec.unmarshalOFloat2ᚖfloat64)
 	if err != nil {
 		return nil, err
 	}
-	args["categoryId"] = arg3
+	args["maxPrice"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "categoryId", ec.unmarshalOID2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["categoryId"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "sortBy", ec.unmarshalOProductSortBy2ᚖgithubᚗcomᚋcanyavuzdbᚋcatalogᚑinventoryᚑapiᚋinternalᚋgraphᚐProductSortBy)
+	if err != nil {
+		return nil, err
+	}
+	args["sortBy"] = arg5
 	return args, nil
 }
 
@@ -893,7 +903,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_products,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().Products(ctx, fc.Args["limit"].(int), fc.Args["minPrice"].(*float64), fc.Args["maxPrice"].(*float64), fc.Args["categoryId"].(*string))
+			return ec.Resolvers.Query().Products(ctx, fc.Args["limit"].(int), fc.Args["offset"].(*int), fc.Args["minPrice"].(*float64), fc.Args["maxPrice"].(*float64), fc.Args["categoryId"].(*string), fc.Args["sortBy"].(*ProductSortBy))
 		},
 		nil,
 		ec.marshalNProduct2ᚕᚖgithubᚗcomᚋcanyavuzdbᚋcatalogᚑinventoryᚑapiᚋinternalᚋgraphᚐProductᚄ,
@@ -3581,11 +3591,45 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
 func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋcanyavuzdbᚋcatalogᚑinventoryᚑapiᚋinternalᚋgraphᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Product(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOProductSortBy2ᚖgithubᚗcomᚋcanyavuzdbᚋcatalogᚑinventoryᚑapiᚋinternalᚋgraphᚐProductSortBy(ctx context.Context, v any) (*ProductSortBy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(ProductSortBy)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOProductSortBy2ᚖgithubᚗcomᚋcanyavuzdbᚋcatalogᚑinventoryᚑapiᚋinternalᚋgraphᚐProductSortBy(ctx context.Context, sel ast.SelectionSet, v *ProductSortBy) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

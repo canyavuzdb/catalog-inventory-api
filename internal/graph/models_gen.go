@@ -2,6 +2,13 @@
 
 package graph
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Category struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -23,4 +30,63 @@ type Product struct {
 }
 
 type Query struct {
+}
+
+type ProductSortBy string
+
+const (
+	ProductSortByPriceAsc      ProductSortBy = "PRICE_ASC"
+	ProductSortByPriceDesc     ProductSortBy = "PRICE_DESC"
+	ProductSortByCreatedAtAsc  ProductSortBy = "CREATED_AT_ASC"
+	ProductSortByCreatedAtDesc ProductSortBy = "CREATED_AT_DESC"
+)
+
+var AllProductSortBy = []ProductSortBy{
+	ProductSortByPriceAsc,
+	ProductSortByPriceDesc,
+	ProductSortByCreatedAtAsc,
+	ProductSortByCreatedAtDesc,
+}
+
+func (e ProductSortBy) IsValid() bool {
+	switch e {
+	case ProductSortByPriceAsc, ProductSortByPriceDesc, ProductSortByCreatedAtAsc, ProductSortByCreatedAtDesc:
+		return true
+	}
+	return false
+}
+
+func (e ProductSortBy) String() string {
+	return string(e)
+}
+
+func (e *ProductSortBy) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductSortBy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductSortBy", str)
+	}
+	return nil
+}
+
+func (e ProductSortBy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProductSortBy) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductSortBy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

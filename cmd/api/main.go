@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -14,7 +15,13 @@ import (
 )
 
 func main() {
-	database.Connect()
+
+	runSeed := false
+	if len(os.Args) > 1 && os.Args[1] == "seed" {
+		runSeed = true
+	}
+
+	database.Connect(runSeed)
 
 	productRepo := repository.NewProductRepository(database.DB)
 	categoryRepo := repository.NewCategoryRepository(database.DB)
